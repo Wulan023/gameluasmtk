@@ -1,0 +1,1100 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Petualangan Penjelajah Bangun Datar - Matematika Kelas 4 SD</title>
+    <!-- Tailwind CSS untuk Desain Responsif & Modern -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Lucide Icons via FontAwesome untuk visual yang kaya -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts untuk font ramah anak -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Quicksand', sans-serif;
+            background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
+        }
+        .font-header {
+            font-family: 'Fredoka One', cursive;
+        }
+        .island-card {
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .island-card:hover:not(.locked) {
+            transform: translateY(-8px) scale(1.05);
+        }
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+        .floating {
+            animation: float 4s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between text-slate-800">
+
+    <!-- HEADER / NAVIGASI ATAS -->
+    <header class="bg-white/80 backdrop-blur-md border-b-4 border-sky-400 p-4 sticky top-0 z-50 shadow-sm">
+        <div class="max-w-4xl mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="bg-amber-400 p-2.5 rounded-2xl shadow-md transform -rotate-3 border-2 border-slate-700">
+                    <i class="fa-solid fa-map-marked-alt text-2xl text-slate-800"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl md:text-2xl font-header text-sky-600 tracking-wide">PETA PENJELAJAH</h1>
+                    <p class="text-xs md:text-sm font-bold text-slate-500">Materi: Luas & Keliling Bangun Datar</p>
+                </div>
+            </div>
+            <!-- Status Global -->
+            <div class="flex items-center gap-4">
+                <div class="bg-emerald-100 px-4 py-2 rounded-2xl border-2 border-emerald-400 flex items-center gap-2">
+                    <i class="fa-solid fa-star text-amber-500 animate-pulse"></i>
+                    <span id="global-score" class="font-header text-emerald-700 text-lg">0</span>
+                </div>
+                <button onclick="bukaPetunjuk()" class="bg-sky-100 hover:bg-sky-200 p-2 rounded-full border-2 border-sky-400 transition-colors">
+                    <i class="fa-solid fa-question-circle text-xl text-sky-600"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- KONTEN UTAMA -->
+    <main class="max-w-4xl w-full mx-auto p-4 flex-grow flex flex-col justify-center">
+
+        <!-- TAMPILAN 1: BERANDA / LOG IN AWAL -->
+        <section id="screen-home" class="bg-white/90 rounded-3xl p-6 md:p-8 border-4 border-slate-800 shadow-xl text-center max-w-xl mx-auto w-full my-6">
+            <div class="mb-6 floating">
+                <span class="text-6xl">🧭</span>
+            </div>
+            <h2 class="text-3xl md:text-4xl font-header text-amber-500 mb-2 leading-tight">PETUALANGAN PENJELAJAH BANGUN DATAR</h2>
+            <p class="text-slate-600 font-medium mb-6 text-sm md:text-base">Halo Calon Penjelajah Hebat! Mari bantu menyelamatkan 5 Pulau Bangun Datar dengan kecerdasan matematikanmu!</p>
+            
+            <div class="mb-6 text-left bg-sky-50 p-4 rounded-2xl border-2 border-sky-200">
+                <label for="player-name" class="block font-bold text-sky-700 mb-2"><i class="fa-solid fa-user mr-2"></i>Tulis Nama Kerenmu:</label>
+                <input type="text" id="player-name" placeholder="Contoh: Budi Juara" class="w-full px-4 py-3 rounded-xl border-3 border-slate-300 focus:outline-none focus:ring-4 focus:ring-sky-300 font-bold text-lg text-slate-700" maxlength="15">
+            </div>
+
+            <button onclick="mulaiPetualangan()" class="w-full bg-amber-400 hover:bg-amber-500 text-slate-800 font-header text-xl py-4 px-6 rounded-2xl border-b-8 border-r-4 border-amber-600 shadow-lg transform active:scale-95 active:border-b-2 active:border-r-2 transition-all">
+                MULAI PETUALANGAN! <i class="fa-solid fa-compass ml-2 animate-spin-slow"></i>
+            </button>
+
+            <!-- Leaderboard Mini -->
+            <div class="mt-8 pt-6 border-t border-slate-200">
+                <h3 class="font-header text-slate-700 mb-3"><i class="fa-solid fa-trophy text-amber-500"></i> PENJELAJAH TERBAIK KELAS</h3>
+                <div id="mini-leaderboard" class="space-y-2 text-sm text-left">
+                    <!-- Dinamis via JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- TAMPILAN 2: PEMILIHAN PULAU (MAP) -->
+        <section id="screen-map" class="hidden">
+            <div class="text-center mb-6">
+                <h2 class="text-2xl font-header text-sky-700 mb-1">Pilihlah Pulau Misi Berikutnya!</h2>
+                <p class="text-slate-600 font-medium">Selesaikan setiap pulau yang berisi masing-masing 5 tantangan soal.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-5 gap-4 my-6">
+                <!-- Pulau 1 -->
+                <div id="island-1" onclick="pilihPulau(1)" class="island-card bg-emerald-50 rounded-2xl p-4 border-4 border-slate-800 shadow-md cursor-pointer flex flex-col justify-between items-center text-center">
+                    <span class="text-4xl my-2">⛰️</span>
+                    <h3 class="font-header text-emerald-700 text-base">Pulau Persegi</h3>
+                    <p class="text-xs font-bold text-slate-500 mt-1">Misi 1-5</p>
+                    <span class="island-status mt-3 bg-emerald-200 text-emerald-800 px-3 py-1 rounded-full text-xs font-bold border border-emerald-400">Terbuka</span>
+                </div>
+
+                <!-- Pulau 2 -->
+                <div id="island-2" onclick="pilihPulau(2)" class="island-card locked bg-slate-100 opacity-60 rounded-2xl p-4 border-4 border-dashed border-slate-400 shadow-md cursor-not-allowed flex flex-col justify-between items-center text-center">
+                    <span class="text-4xl my-2">🔒</span>
+                    <h3 class="font-header text-slate-600 text-base">Pulau P. Panjang</h3>
+                    <p class="text-xs font-bold text-slate-400 mt-1">Misi 6-10</p>
+                    <span class="island-status mt-3 bg-slate-300 text-slate-600 px-3 py-1 rounded-full text-xs font-bold">Terkunci</span>
+                </div>
+
+                <!-- Pulau 3 -->
+                <div id="island-3" onclick="pilihPulau(3)" class="island-card locked bg-slate-100 opacity-60 rounded-2xl p-4 border-4 border-dashed border-slate-400 shadow-md cursor-not-allowed flex flex-col justify-between items-center text-center">
+                    <span class="text-4xl my-2">🔒</span>
+                    <h3 class="font-header text-slate-600 text-base">Pulau Segitiga</h3>
+                    <p class="text-xs font-bold text-slate-400 mt-1">Misi 11-15</p>
+                    <span class="island-status mt-3 bg-slate-300 text-slate-600 px-3 py-1 rounded-full text-xs font-bold">Terkunci</span>
+                </div>
+
+                <!-- Pulau 4 -->
+                <div id="island-4" onclick="pilihPulau(4)" class="island-card locked bg-slate-100 opacity-60 rounded-2xl p-4 border-4 border-dashed border-slate-400 shadow-md cursor-not-allowed flex flex-col justify-between items-center text-center">
+                    <span class="text-4xl my-2">🔒</span>
+                    <h3 class="font-header text-slate-600 text-base">Hutan Luas Gabungan</h3>
+                    <p class="text-xs font-bold text-slate-400 mt-1">Misi 16-20</p>
+                    <span class="island-status mt-3 bg-slate-300 text-slate-600 px-3 py-1 rounded-full text-xs font-bold">Terkunci</span>
+                </div>
+
+                <!-- Pulau 5 -->
+                <div id="island-5" onclick="pilihPulau(5)" class="island-card locked bg-slate-100 opacity-60 rounded-2xl p-4 border-4 border-dashed border-slate-400 shadow-md cursor-not-allowed flex flex-col justify-between items-center text-center">
+                    <span class="text-4xl my-2">🔒</span>
+                    <h3 class="font-header text-slate-600 text-base">Kastil Raja Bangun</h3>
+                    <p class="text-xs font-bold text-slate-400 mt-1">Misi 21-25</p>
+                    <span class="island-status mt-3 bg-slate-300 text-slate-600 px-3 py-1 rounded-full text-xs font-bold">Terkunci</span>
+                </div>
+            </div>
+
+            <!-- Tombol Kembali Ke Home -->
+            <div class="text-center mt-6">
+                <button onclick="kembaliKeHome()" class="bg-slate-500 hover:bg-slate-600 text-white font-bold px-6 py-2.5 rounded-xl transition-all">
+                    <i class="fa-solid fa-arrow-left mr-2"></i>Ganti Nama / Keluar
+                </button>
+            </div>
+        </section>
+
+        <!-- TAMPILAN 3: INTERAKSI GAMEPLAY SOAL -->
+        <section id="screen-game" class="hidden">
+            <!-- Atas Game: Nyawa & Progress -->
+            <div class="flex justify-between items-center bg-white p-4 rounded-2xl border-2 border-slate-300 shadow-sm mb-4">
+                <div class="flex items-center gap-2">
+                    <span class="font-bold text-slate-600 text-sm">Nyawa:</span>
+                    <div id="heart-container" class="flex gap-1">
+                        <!-- Nyawa berupa emoji hati digambar via JS -->
+                    </div>
+                </div>
+                <div class="text-right">
+                    <span class="font-bold text-sky-600 text-sm">Soal Aktif:</span>
+                    <div id="question-progress" class="font-header text-slate-700 text-lg">0 / 5</div>
+                </div>
+            </div>
+
+            <!-- Box Tantangan Utama -->
+            <div class="bg-white rounded-3xl p-6 md:p-8 border-4 border-slate-800 shadow-xl relative overflow-hidden">
+                <!-- Banner Jenis Soal -->
+                <div id="question-tag" class="absolute top-0 right-0 bg-sky-500 text-white px-4 py-1.5 rounded-bl-xl font-header text-xs tracking-wider">
+                    PERSEGI
+                </div>
+
+                <!-- Bagian Kiri: Ilustrasi Visual | Bagian Kanan: Narasi Soal -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center mb-6">
+                    <!-- Kanvas/Gambar Visual Bangun Datar -->
+                    <div class="bg-slate-50 border-2 border-slate-300 rounded-2xl p-4 flex flex-col justify-center items-center min-h-[220px] relative">
+                        <div id="canvas-container" class="w-full h-44 flex items-center justify-center">
+                            <!-- SVG atau Representasi Grafis Digambar Dinamis di Sini -->
+                        </div>
+                        <div id="canvas-label" class="text-xs text-slate-500 font-bold mt-2 text-center">
+                            *Gambar di atas hanyalah ilustrasi pembantu
+                        </div>
+                    </div>
+
+                    <!-- Soal Teks -->
+                    <div class="flex flex-col justify-center">
+                        <div class="bg-amber-100 text-amber-900 font-bold px-3 py-1.5 rounded-lg text-xs self-start mb-3 border border-amber-300 uppercase tracking-wider" id="question-topic">
+                            Keliling Persegi
+                        </div>
+                        <p id="question-text" class="text-base md:text-lg font-bold leading-relaxed text-slate-800 mb-4">
+                            Mencari teks pertanyaan...
+                        </p>
+                        <!-- Petunjuk Rumus Singkat (bisa ditampilkan jika klik butuh bantuan) -->
+                        <div id="hint-box" class="hidden bg-emerald-50 text-emerald-800 p-3 rounded-xl border border-emerald-300 text-xs font-semibold mb-4">
+                            💡 <strong>Petunjuk Rumus:</strong> <span id="hint-text">Rumus keliling persegi adalah Sisi x 4</span>
+                        </div>
+                        <button onclick="tampilkanBantuanRumus()" id="btn-hint" class="self-start text-xs font-bold text-sky-600 hover:text-sky-700 underline">
+                            <i class="fa-solid fa-lightbulb mr-1 text-amber-500"></i>Butuh Bantuan Rumus?
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Opsi Jawaban (Pilihan Ganda) -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6" id="answer-options-container">
+                    <!-- Tombol Opsi Jawaban Digambar Dinamis via JS -->
+                </div>
+
+                <!-- Kontrol Navigasi Tambahan -->
+                <div class="flex justify-between items-center border-t border-slate-100 pt-4">
+                    <button onclick="kembaliKeMap()" class="text-slate-500 hover:text-slate-700 font-bold text-sm">
+                        <i class="fa-solid fa-map mr-1"></i>Kembali ke Peta Misi
+                    </button>
+                    <span id="player-playing-name" class="text-xs bg-slate-100 px-3 py-1.5 rounded-lg font-semibold text-slate-600">
+                        Pemain: -
+                    </span>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAMPILAN 4: RINGKASAN SKOR/GAME OVER -->
+        <section id="screen-game-over" class="hidden bg-white/95 rounded-3xl p-6 md:p-8 border-4 border-slate-800 shadow-xl text-center max-w-xl mx-auto w-full my-6">
+            <div id="go-emoji" class="text-6xl mb-4">🎉</div>
+            <h2 id="go-title" class="text-3xl font-header text-amber-500 mb-2">PULAU SELESAI!</h2>
+            <p id="go-message" class="text-slate-600 font-medium mb-6">Hebat sekali kamu berhasil menuntaskan tantangan ini.</p>
+
+            <div class="bg-sky-50 border-2 border-sky-300 rounded-2xl p-6 mb-6">
+                <div class="text-xs uppercase font-bold tracking-wider text-sky-600 mb-1">Skor yang Diperoleh</div>
+                <div id="go-score" class="text-5xl font-header text-sky-700 mb-3">0</div>
+                <div class="text-slate-500 text-sm font-semibold" id="go-accuracy">Benar: 0 / Salah: 0</div>
+            </div>
+
+            <div class="flex flex-col sm:flex-row gap-3">
+                <button onclick="kembaliKeMap()" class="flex-1 bg-sky-500 hover:bg-sky-600 text-white font-header py-3 px-6 rounded-xl border-b-4 border-sky-700 transition-all">
+                    LIHAT PETA MISI <i class="fa-solid fa-map-marked-alt ml-1"></i>
+                </button>
+                <button onclick="mainLagiPulauIni()" class="flex-1 bg-amber-400 hover:bg-amber-500 text-slate-800 font-header py-3 px-6 rounded-xl border-b-4 border-amber-600 transition-all">
+                    MAIN LAGI PULAU INI <i class="fa-solid fa-rotate-left ml-1"></i>
+                </button>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-slate-800 text-slate-400 py-4 text-center text-xs border-t-4 border-slate-900 mt-6">
+        <div class="max-w-4xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-2">
+            <p class="font-semibold">© 2026 Game Matematika Bangun Datar Kelas 4 SD Semester 2</p>
+            <p class="text-slate-500">Dirancang khusus untuk membantu pembelajaran interaktif guru & murid</p>
+        </div>
+    </footer>
+
+    <!-- MODAL POPUP: PETUNJUK & RUMUS -->
+    <div id="modal-petunjuk" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl p-6 max-w-lg w-full border-4 border-slate-800 shadow-2xl">
+            <div class="flex justify-between items-center mb-4 pb-2 border-b-2 border-slate-100">
+                <h3 class="font-header text-sky-600 text-xl"><i class="fa-solid fa-book-open text-amber-400 mr-2"></i>Buku Panduan Rumus</h3>
+                <button onclick="tutupPetunjuk()" class="text-slate-400 hover:text-slate-600 text-2xl font-bold">&times;</button>
+            </div>
+            
+            <div class="space-y-4 max-h-[350px] overflow-y-auto pr-2 text-sm text-slate-700 text-left">
+                <!-- Rumus Persegi -->
+                <div class="bg-emerald-50 p-3 rounded-xl border border-emerald-200">
+                    <h4 class="font-header text-emerald-800 text-sm mb-1">🟦 PERSEGI</h4>
+                    <p class="mb-1"><strong>Keliling:</strong> $4 \times \text{sisi}$</p>
+                    <p><strong>Luas:</strong> $\text{sisi} \times \text{sisi} \quad (\text{s}^2)$</p>
+                </div>
+                <!-- Rumus Persegi Panjang -->
+                <div class="bg-sky-50 p-3 rounded-xl border border-sky-200">
+                    <h4 class="font-header text-sky-800 text-sm mb-1">🟫 PERSEGI PANJANG</h4>
+                    <p class="mb-1"><strong>Keliling:</strong> $2 \times (\text{panjang} + \text{lebar})$</p>
+                    <p><strong>Luas:</strong> $\text{panjang} \times \text{lebar}$</p>
+                </div>
+                <!-- Rumus Segitiga -->
+                <div class="bg-amber-50 p-3 rounded-xl border border-amber-200">
+                    <h4 class="font-header text-amber-800 text-sm mb-1">🔺 SEGITIGA</h4>
+                    <p class="mb-1"><strong>Keliling:</strong> $\text{Sisi A} + \text{Sisi B} + \text{Sisi C}$</p>
+                    <p><strong>Luas:</strong> $\frac{\text{alas} \times \text{tinggi}}{2}$</p>
+                </div>
+                <div class="bg-slate-100 p-3 rounded-xl text-slate-600 text-xs">
+                    💡 <strong>Tips Tambahan:</strong> Perhatikan satuan ukuran yang digunakan pada soal, misalnya cm atau cm²!
+                </div>
+            </div>
+
+            <button onclick="tutupPetunjuk()" class="w-full mt-6 bg-sky-500 hover:bg-sky-600 text-white font-header py-3 rounded-xl border-b-4 border-sky-700">
+                MENGERTI, LANJUTKAN!
+            </button>
+        </div>
+    </div>
+
+    <!-- MODAL POPUP: NOTIFIKASI JAWABAN BENAR/SALAH -->
+    <div id="modal-feedback" class="hidden fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl p-6 max-w-sm w-full border-4 border-slate-800 shadow-2xl text-center">
+            <div id="feedback-icon" class="text-6xl mb-4 animate-bounce">🎉</div>
+            <h3 id="feedback-title" class="font-header text-2xl mb-2 text-emerald-600">HEBAT! BENAR!</h3>
+            <p id="feedback-text" class="text-slate-600 text-sm font-semibold mb-6">Penjelasannya ada di sini...</p>
+            <button id="feedback-next-btn" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-header py-3 rounded-xl border-b-4 border-emerald-700">
+                LANJUTKAN MISI <i class="fa-solid fa-arrow-right ml-1"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- AUDIO SYNTHESIS & LOGIC JS -->
+    <script>
+        // Data bank soal (25 soal yang terbagi dalam 5 pulau)
+        // Setiap pulau memiliki 5 soal yang bervariasi dari mudah ke sulit
+        const bankSoal = {
+            1: [ // PULAU 1: PERSEGI (Misi 1-5)
+                {
+                    id: 1,
+                    topik: "Keliling Persegi",
+                    pertanyaan: "Sebuah ubin berbentuk persegi memiliki panjang sisi 15 cm. Berapakah keliling ubin tersebut?",
+                    visual: { tipe: "persegi", s: 15 },
+                    rumusHint: "Keliling = 4 × Sisi",
+                    opsi: ["30 cm", "45 cm", "60 cm", "75 cm"],
+                    jawaban: "60 cm",
+                    pembahasan: "Keliling ubin persegi = 4 × Sisi = 4 × 15 cm = 60 cm."
+                },
+                {
+                    id: 2,
+                    topik: "Luas Persegi",
+                    pertanyaan: "Kebun bunga milik Ibu berbentuk persegi dengan sisi sepanjang 8 meter. Berapa meter persegikah luas kebun tersebut?",
+                    visual: { tipe: "persegi", s: 8 },
+                    rumusHint: "Luas = Sisi × Sisi",
+                    opsi: ["16 m²", "32 m²", "64 m²", "80 m²"],
+                    jawaban: "64 m²",
+                    pembahasan: "Luas kebun persegi = Sisi × Sisi = 8 m × 8 m = 64 m²."
+                },
+                {
+                    id: 3,
+                    topik: "Mencari Sisi dari Keliling",
+                    pertanyaan: "Sebuah papan catur persegi memiliki keliling total 120 cm. Berapa panjang satu sisinya?",
+                    visual: { tipe: "persegi", s: "?", k: 120 },
+                    rumusHint: "Sisi = Keliling ÷ 4",
+                    opsi: ["20 cm", "30 cm", "40 cm", "50 cm"],
+                    jawaban: "30 cm",
+                    pembahasan: "Sisi papan catur = Keliling ÷ 4 = 120 cm ÷ 4 = 30 cm."
+                },
+                {
+                    id: 4,
+                    topik: "Mencari Sisi dari Luas",
+                    pertanyaan: "Sebuah kertas lipat persegi memiliki luas 100 cm². Panjang sisinya adalah...",
+                    visual: { tipe: "persegi", s: "?", l: 100 },
+                    rumusHint: "Sisi = √Luas (Berapa kali berapa yang hasilnya sama dengan Luas?)",
+                    opsi: ["10 cm", "20 cm", "25 cm", "50 cm"],
+                    jawaban: "10 cm",
+                    pembahasan: "Panjang sisi = √100 cm² = 10 cm, karena 10 cm × 10 cm = 100 cm²."
+                },
+                {
+                    id: 5,
+                    topik: "Keliling & Luas Persegi",
+                    pertanyaan: "Sebuah bingkai foto berbentuk persegi memiliki sisi 20 cm. Berapa berturut-turut keliling dan luas bingkai tersebut?",
+                    visual: { tipe: "persegi", s: 20 },
+                    rumusHint: "K = 4 × S, L = S × S",
+                    opsi: ["K = 40 cm, L = 400 m²", "K = 80 cm, L = 200 cm²", "K = 80 cm, L = 400 cm²", "K = 400 cm, L = 80 cm²"],
+                    jawaban: "K = 80 cm, L = 400 cm²",
+                    pembahasan: "K = 4 × 20 = 80 cm. L = 20 × 20 = 400 cm²."
+                }
+            ],
+            2: [ // PULAU 2: PERSEGI PANJANG (Misi 6-10)
+                {
+                    id: 6,
+                    topik: "Keliling Persegi Panjang",
+                    pertanyaan: "Penggaris guru berbentuk persegi panjang dengan panjang 30 cm dan lebar 10 cm. Keliling penggaris tersebut adalah...",
+                    visual: { tipe: "persegi_panjang", p: 30, l: 10 },
+                    rumusHint: "Keliling = 2 × (Panjang + Lebar)",
+                    opsi: ["40 cm", "60 cm", "80 cm", "300 cm"],
+                    jawaban: "80 cm",
+                    pembahasan: "Keliling = 2 × (p + l) = 2 × (30 + 10) = 2 × 40 = 80 cm."
+                },
+                {
+                    id: 7,
+                    topik: "Luas Persegi Panjang",
+                    pertanyaan: "Sebuah lapangan sepak bola mini memiliki ukuran panjang 40 meter dan lebar 25 meter. Berapa luas lapangan tersebut?",
+                    visual: { tipe: "persegi_panjang", p: 40, l: 25 },
+                    rumusHint: "Luas = Panjang × Lebar",
+                    opsi: ["1.000 m²", "500 m²", "130 m²", "65 m²"],
+                    jawaban: "1.000 m²",
+                    pembahasan: "Luas = Panjang × Lebar = 40 m × 25 m = 1.000 m²."
+                },
+                {
+                    id: 8,
+                    topik: "Mencari Lebar jika Diketahui Luas",
+                    pertanyaan: "Sebuah lembar meja belajar memiliki luas 2.400 cm². Jika panjang meja adalah 60 cm, maka lebar meja adalah...",
+                    visual: { tipe: "persegi_panjang", p: 60, l: "?" },
+                    rumusHint: "Lebar = Luas ÷ Panjang",
+                    opsi: ["20 cm", "30 cm", "40 cm", "50 cm"],
+                    jawaban: "40 cm",
+                    pembahasan: "Lebar = Luas ÷ Panjang = 2.400 cm² ÷ 60 cm = 40 cm."
+                },
+                {
+                    id: 9,
+                    topik: "Mencari Panjang jika Diketahui Keliling",
+                    pertanyaan: "Keliling sebuah kolam renang anak berbentuk persegi panjang adalah 50 meter. Jika lebar kolam adalah 10 meter, berapa panjang kolam tersebut?",
+                    visual: { tipe: "persegi_panjang", p: "?", l: 10, k: 50 },
+                    rumusHint: "Panjang = (Keliling ÷ 2) - Lebar",
+                    opsi: ["15 meter", "20 meter", "30 meter", "40 meter"],
+                    jawaban: "15 meter",
+                    pembahasan: "Panjang = (Keliling ÷ 2) - Lebar = (50 ÷ 2) - 10 = 25 - 10 = 15 meter."
+                },
+                {
+                    id: 10,
+                    topik: "Perbandingan Dua Persegi Panjang",
+                    pertanyaan: "Ada dua buah papan tulis. Papan tulis A berukuran 3 m x 2 m. Papan tulis B berukuran 4 m x 1.5 m. Mana yang memiliki luas lebih besar?",
+                    visual: { tipe: "dua_bangun" },
+                    rumusHint: "Cari luas masing-masing dengan P × L lalu bandingkan",
+                    opsi: ["Papan tulis A lebih besar", "Papan tulis B lebih besar", "Kedua papan tulis sama luasnya", "Tidak bisa dihitung"],
+                    jawaban: "Kedua papan tulis sama luasnya",
+                    pembahasan: "Luas A = 3 × 2 = 6 m². Luas B = 4 × 1.5 = 6 m². Jadi, keduanya sama luasnya."
+                }
+            ],
+            3: [ // PULAU 3: SEGITIGA (Misi 11-15)
+                {
+                    id: 11,
+                    topik: "Keliling Segitiga Sama Sisi",
+                    pertanyaan: "Sebuah rambu lalu lintas berbentuk segitiga sama sisi dengan panjang salah satu sisinya 12 cm. Berapakah keliling rambu tersebut?",
+                    visual: { tipe: "segitiga_sisi", s: 12 },
+                    rumusHint: "Keliling Segitiga Sama Sisi = 3 × Sisi",
+                    opsi: ["24 cm", "36 cm", "48 cm", "144 cm"],
+                    jawaban: "36 cm",
+                    pembahasan: "Keliling = 3 × Sisi = 3 × 12 cm = 36 cm."
+                },
+                {
+                    id: 12,
+                    topik: "Luas Segitiga",
+                    pertanyaan: "Kakak membuat bendera kertas berbentuk segitiga dengan alas sepanjang 16 cm dan tingginya 10 cm. Luas kertas bendera tersebut adalah...",
+                    visual: { tipe: "segitiga_siku", a: 16, t: 10 },
+                    rumusHint: "Luas Segitiga = (Alas × Tinggi) ÷ 2",
+                    opsi: ["160 cm²", "80 cm²", "40 cm²", "52 cm²"],
+                    jawaban: "80 cm²",
+                    pembahasan: "Luas = (Alas × Tinggi) ÷ 2 = (16 cm × 10 cm) ÷ 2 = 160 ÷ 2 = 80 cm²."
+                },
+                {
+                    id: 13,
+                    topik: "Keliling Segitiga Sembarang / Sama Kaki",
+                    pertanyaan: "Sebuah penggaris segitiga sama kaki memiliki panjang sisi alas 10 cm dan panjang kedua sisi kakinya masing-masing 13 cm. Berapa keliling penggaris tersebut?",
+                    visual: { tipe: "segitiga_kaki", a: 10, k: 13 },
+                    rumusHint: "Keliling Segitiga = Sisi 1 + Sisi 2 + Sisi 3",
+                    opsi: ["23 cm", "33 cm", "36 cm", "46 cm"],
+                    jawaban: "36 cm",
+                    pembahasan: "Keliling = alas + kaki + kaki = 10 + 13 + 13 = 36 cm."
+                },
+                {
+                    id: 14,
+                    topik: "Mencari Alas Segitiga",
+                    pertanyaan: "Sebuah potongan kue berbentuk segitiga memiliki luas 24 cm² dan tinggi kue adalah 8 cm. Berapa panjang alas potongan kue tersebut?",
+                    visual: { tipe: "segitiga_siku", a: "?", t: 8 },
+                    rumusHint: "Alas = (2 × Luas) ÷ Tinggi",
+                    opsi: ["4 cm", "6 cm", "8 cm", "12 cm"],
+                    jawaban: "6 cm",
+                    pembahasan: "Alas = (2 × Luas) ÷ Tinggi = (2 × 24) ÷ 8 = 48 ÷ 8 = 6 cm."
+                },
+                {
+                    id: 15,
+                    topik: "Logika Segitiga Siku-Siku",
+                    pertanyaan: "Segitiga siku-siku memiliki panjang alas 6 cm, tinggi 8 cm, dan sisi miring 10 cm. Keliling segitiga siku-siku tersebut adalah...",
+                    visual: { tipe: "segitiga_siku", a: 6, t: 8, m: 10 },
+                    rumusHint: "Keliling adalah jumlah seluruh sisinya. Jangan terjebak rumus luas!",
+                    opsi: ["14 cm", "24 cm", "48 cm", "144 cm"],
+                    jawaban: "24 cm",
+                    pembahasan: "Keliling = alas + tinggi + sisi miring = 6 + 8 + 10 = 24 cm."
+                }
+            ],
+            4: [ // PULAU 4: GABUNGAN BANGUN DATAR (Misi 16-20)
+                {
+                    id: 16,
+                    topik: "Luas Gabungan Dua Persegi",
+                    pertanyaan: "Dua buah persegi kecil berukuran masing-masing sisinya 5 cm disusun mendatar bersampingan sehingga menempel rapat. Berapa total luas gabungan kedua persegi tersebut?",
+                    visual: { tipe: "gabungan_persegi" },
+                    rumusHint: "Hitung luas satu persegi lalu kalikan dua",
+                    opsi: ["10 cm²", "25 cm²", "50 cm²", "100 cm²"],
+                    jawaban: "50 cm²",
+                    pembahasan: "Luas satu persegi = 5 × 5 = 25 cm². Karena ada dua buah, luas gabungannya = 25 + 25 = 50 cm²."
+                },
+                {
+                    id: 17,
+                    topik: "Keliling Gabungan",
+                    pertanyaan: "Sebuah kolam berbentuk huruf L terbuat dari gabungan dua persegi panjang. Sisi luar kolam dipasangi pagar sepanjang 12 m, 10 m, 6 m, 4 m, 6 m, dan 6 m. Berapa total keliling kolam tersebut?",
+                    visual: { tipe: "gabungan_l" },
+                    rumusHint: "Keliling didapat dengan menjumlahkan semua panjang sisi luar bangun tersebut.",
+                    opsi: ["44 m", "38 m", "34 m", "28 m"],
+                    jawaban: "44 m",
+                    pembahasan: "Keliling adalah jumlah sisi luar: 12 + 10 + 6 + 4 + 6 + 6 = 44 meter."
+                },
+                {
+                    id: 18,
+                    topik: "Luas Daerah Diarsir",
+                    pertanyaan: "Sebuah karton berbentuk persegi panjang ukuran 20 cm x 15 cm dilubangi di tengahnya berbentuk persegi ukuran 5 cm x 5 cm. Berapa luas karton yang tersisa?",
+                    visual: { tipe: "diarsir" },
+                    rumusHint: "Luas Karton Sisa = Luas Persegi Panjang - Luas Lubang Persegi",
+                    opsi: ["300 cm²", "275 cm²", "250 cm²", "175 cm²"],
+                    jawaban: "275 cm²",
+                    pembahasan: "Luas persegi panjang = 20 × 15 = 300 cm². Luas persegi = 5 × 5 = 25 cm². Luas sisa = 300 - 25 = 275 cm²."
+                },
+                {
+                    id: 19,
+                    topik: "Misi Halaman Rumah",
+                    pertanyaan: "Halaman rumah berbentuk persegi panjang berukuran 10 m x 8 m. Di tengah halaman dibuat taman bunga berbentuk persegi panjang dengan ukuran 6 m x 4 m. Sisanya dipasang paving block. Berapa luas halaman yang dipasang paving block?",
+                    visual: { tipe: "halaman" },
+                    rumusHint: "Luas paving = Luas total halaman - Luas taman bunga",
+                    opsi: ["24 m²", "56 m²", "80 m²", "104 m²"],
+                    jawaban: "56 m²",
+                    pembahasan: "Luas total = 10 × 8 = 80 m². Luas taman = 6 × 4 = 24 m². Luas paving = 80 - 24 = 56 m²."
+                },
+                {
+                    id: 20,
+                    topik: "Atap Rumah Segitiga & Persegi Panjang",
+                    pertanyaan: "Tembok samping sebuah bangunan berbentuk persegi panjang dengan panjang 6 m dan tinggi 4 m. Di atasnya terdapat atap berbentuk segitiga dengan alas 6 m dan tingginya 3 m. Berapakah total luas gabungan tembok samping bangunan tersebut?",
+                    visual: { tipe: "rumah" },
+                    rumusHint: "Hitung Luas Persegi Panjang + Luas Segitiga",
+                    opsi: ["15 m²", "24 m²", "33 m²", "42 m²"],
+                    jawaban: "33 m²",
+                    pembahasan: "Luas persegi panjang = 6 × 4 = 24 m². Luas segitiga = (6 × 3) ÷ 2 = 9 m². Total luas = 24 + 9 = 33 m²."
+                }
+            ],
+            5: [ // PULAU 5: KASTIL RAJA BANGUN (Misi 21-25 - Soal Cerita Harian / Tantangan)
+                {
+                    id: 21,
+                    topik: "Lari Mengelilingi Lapangan",
+                    pertanyaan: "Andi berlari mengelilingi lapangan berbentuk persegi panjang sebanyak 3 kali putaran. Jika lapangan tersebut berukuran 30 meter x 20 meter, berapa total jarak yang ditempuh Andi?",
+                    visual: { tipe: "lapangan_putaran" },
+                    rumusHint: "Jarak = Keliling × Jumlah Putaran",
+                    opsi: ["100 meter", "200 meter", "300 meter", "600 meter"],
+                    jawaban: "300 meter",
+                    pembahasan: "Keliling lapangan = 2 × (30 + 20) = 100 m. Jarak tempuh = 100 m × 3 putaran = 300 meter."
+                },
+                {
+                    id: 22,
+                    topik: "Biaya Menanam Rumput",
+                    pertanyaan: "Sebuah taman berbentuk persegi dengan sisi 10 meter akan ditanami rumput hias. Jika harga rumput adalah Rp 20.000 per meter persegi, berapakah total biaya yang dibutuhkan?",
+                    visual: { tipe: "biaya_rumput" },
+                    rumusHint: "Total Biaya = Luas Taman × Harga Rumput",
+                    opsi: ["Rp 2.000.000", "Rp 1.000.000", "Rp 800.000", "Rp 400.000"],
+                    jawaban: "Rp 2.000.000",
+                    pembahasan: "Luas taman = 10 m × 10 m = 100 m². Total biaya = 100 × Rp 20.000 = Rp 2.000.000."
+                },
+                {
+                    id: 23,
+                    topik: "Keliling Potongan Segitiga",
+                    pertanyaan: "Paman memotong kayu lapis menjadi bentuk segitiga siku-siku dengan sisi penyiku masing-masing 15 cm dan 20 cm, serta sisi miring 25 cm. Berapa panjang lis kayu yang dibutuhkan untuk membingkai sekeliling kayu lapis tersebut?",
+                    visual: { tipe: "segitiga_siku", a: 15, t: 20, m: 25 },
+                    rumusHint: "Membingkai keliling artinya menghitung total seluruh sisi segitiga",
+                    opsi: ["35 cm", "45 cm", "60 cm", "150 cm"],
+                    jawaban: "60 cm",
+                    pembahasan: "Panjang bingkai = Keliling = 15 + 20 + 25 = 60 cm."
+                },
+                {
+                    id: 24,
+                    topik: "Banyak Ubin di Kamar",
+                    pertanyaan: "Lantai kamar tidur berbentuk persegi panjang berukuran 4 m x 3 m (atau 400 cm x 300 cm). Lantai tersebut akan dipasangi ubin keramik persegi berukuran 20 cm x 20 cm. Berapa banyak ubin keramik yang dibutuhkan?",
+                    visual: { tipe: "ubin" },
+                    rumusHint: "Banyak ubin = Luas Kamar (dalam cm²) ÷ Luas satu ubin",
+                    opsi: ["300 buah", "600 buah", "1.200 buah", "120 buah"],
+                    jawaban: "300 buah",
+                    pembahasan: "Luas kamar = 400 cm × 300 cm = 120.000 cm². Luas ubin = 20 cm × 20 cm = 400 cm². Banyak ubin = 120.000 ÷ 400 = 300 buah."
+                },
+                {
+                    id: 25,
+                    topik: "Logika Pagar Melingkar",
+                    pertanyaan: "Pak Tani ingin memagari kebun sayurnya yang berbentuk persegi panjang berukuran 12 meter x 8 meter. Jika bagian depan kebun selebar 4 meter dibiarkan terbuka tanpa pagar sebagai pintu gerbang, berapakah panjang pagar yang terpasang?",
+                    visual: { tipe: "gerbang" },
+                    rumusHint: "Panjang pagar = Keliling Kebun - Lebar Pintu Gerbang",
+                    opsi: ["40 meter", "36 meter", "32 meter", "16 meter"],
+                    jawaban: "36 meter",
+                    pembahasan: "Keliling kebun = 2 × (12 + 8) = 40 meter. Karena ada gerbang selebar 4 m yang tidak dipagari, maka panjang pagar = 40 - 4 = 36 meter."
+                }
+            ]
+        };
+
+        // State Global Aplikasi
+        let state = {
+            namaPemain: "Penjelajah",
+            skorGlobal: 0,
+            pulauAktif: 1,
+            indeksSoalAktif: 0,
+            nyawa: 3,
+            soalBenarPulau: 0,
+            soalSalahPulau: 0,
+            pulauSelesai: { 1: false, 2: false, 3: false, 4: false, 5: false }
+        };
+
+        // Inisialisasi awal saat window dimuat
+        window.onload = function() {
+            muatLeaderboard();
+            kembaliKeHome();
+        }
+
+        // TAMPILKAN POPUP PETUNJUK
+        function bukaPetunjuk() {
+            document.getElementById('modal-petunjuk').classList.remove('hidden');
+        }
+        function tutupPetunjuk() {
+            document.getElementById('modal-petunjuk').classList.add('hidden');
+        }
+
+        // FUNGSI LOG IN DAN MULAI PETUALANGAN
+        function mulaiPetualangan() {
+            const inputNama = document.getElementById('player-name').value.trim();
+            if (inputNama === "") {
+                speakText("Silakan tulis nama kerenmu dulu ya!");
+                alert("Tulis namamu terlebih dahulu untuk memulai petualangan!");
+                return;
+            }
+            state.namaPemain = inputNama;
+            document.getElementById('player-playing-name').innerText = "Pemain: " + state.namaPemain;
+            
+            // Masuk ke tampilan map
+            pindahTampilan('screen-map');
+            speakText("Selamat datang " + state.namaPemain + "! Pilihlah pulau pertama untuk memulai misi!");
+        }
+
+        function kembaliKeHome() {
+            pindahTampilan('screen-home');
+        }
+
+        function kembaliKeMap() {
+            updatePetaVisual();
+            pindahTampilan('screen-map');
+        }
+
+        // SWITCHING TAMPILAN SCREEN
+        function pindahTampilan(screenId) {
+            document.getElementById('screen-home').classList.add('hidden');
+            document.getElementById('screen-map').classList.add('hidden');
+            document.getElementById('screen-game').classList.add('hidden');
+            document.getElementById('screen-game-over').classList.add('hidden');
+
+            document.getElementById(screenId).classList.remove('hidden');
+        }
+
+        // UPDATE STATUS KETERBUKAAN PULAU DI PETA
+        function updatePetaVisual() {
+            document.getElementById('global-score').innerText = state.skorGlobal;
+            
+            for (let i = 1; i <= 5; i++) {
+                const card = document.getElementById(`island-${i}`);
+                const statusLabel = card.querySelector('.island-status');
+                const emoji = card.querySelector('.text-4xl');
+
+                // Pulau 1 selalu terbuka, pulau berikutnya terbuka jika pulau sebelumnya selesai
+                let terbuka = (i === 1) || (state.pulauSelesai[i - 1] === true);
+
+                if (terbuka) {
+                    card.classList.remove('locked', 'bg-slate-100', 'opacity-60', 'cursor-not-allowed', 'border-dashed', 'border-slate-400');
+                    card.classList.add('cursor-pointer', 'border-slate-800');
+                    
+                    if (i === 1) {
+                        card.className = "island-card bg-emerald-50 rounded-2xl p-4 border-4 border-slate-800 shadow-md cursor-pointer flex flex-col justify-between items-center text-center";
+                        emoji.innerText = "⛰️";
+                    } else if (i === 2) {
+                        card.className = "island-card bg-sky-50 rounded-2xl p-4 border-4 border-slate-800 shadow-md cursor-pointer flex flex-col justify-between items-center text-center";
+                        emoji.innerText = "🏖️";
+                    } else if (i === 3) {
+                        card.className = "island-card bg-amber-50 rounded-2xl p-4 border-4 border-slate-800 shadow-md cursor-pointer flex flex-col justify-between items-center text-center";
+                        emoji.innerText = "🌋";
+                    } else if (i === 4) {
+                        card.className = "island-card bg-teal-50 rounded-2xl p-4 border-4 border-slate-800 shadow-md cursor-pointer flex flex-col justify-between items-center text-center";
+                        emoji.innerText = "🌲";
+                    } else if (i === 5) {
+                        card.className = "island-card bg-violet-50 rounded-2xl p-4 border-4 border-slate-800 shadow-md cursor-pointer flex flex-col justify-between items-center text-center";
+                        emoji.innerText = "🏰";
+                    }
+
+                    if (state.pulauSelesai[i]) {
+                        statusLabel.innerText = "Selesai ⭐";
+                        statusLabel.className = "island-status mt-3 bg-amber-300 text-slate-800 px-3 py-1 rounded-full text-xs font-bold border-2 border-amber-500 animate-pulse";
+                    } else {
+                        statusLabel.innerText = "Mulai Misi";
+                        statusLabel.className = "island-status mt-3 bg-indigo-500 text-white px-3 py-1 rounded-full text-xs font-bold hover:bg-indigo-600";
+                    }
+                } else {
+                    card.className = "island-card locked bg-slate-100 opacity-60 rounded-2xl p-4 border-4 border-dashed border-slate-400 shadow-md cursor-not-allowed flex flex-col justify-between items-center text-center";
+                    emoji.innerText = "🔒";
+                    statusLabel.innerText = "Terkunci";
+                    statusLabel.className = "island-status mt-3 bg-slate-300 text-slate-600 px-3 py-1 rounded-full text-xs font-bold";
+                }
+            }
+        }
+
+        // MEMULAI PULAU PILIHAN
+        function pilihPulau(nomorPulau) {
+            // Cek status kunci pulau
+            if (nomorPulau > 1 && !state.pulauSelesai[nomorPulau - 1]) {
+                speakText("Ups! Pulau ini terkunci. Kamu harus menyelesaikan pulau sebelumnya dulu!");
+                alert("Kamu harus menyelesaikan misi di pulau sebelumnya dulu ya!");
+                return;
+            }
+
+            state.pulauAktif = nomorPulau;
+            state.indeksSoalAktif = 0;
+            state.nyawa = 3;
+            state.soalBenarPulau = 0;
+            state.soalSalahPulau = 0;
+
+            pindahTampilan('screen-game');
+            muatSoalAktif();
+        }
+
+        // MENAMPILKAN SOAL AKTIF KE INTERFACE
+        function muatSoalAktif() {
+            const listSoalPulau = bankSoal[state.pulauAktif];
+            const dataSoal = listSoalPulau[state.indeksSoalAktif];
+
+            // Reset box bantuan rumus (disembunyikan kembali)
+            document.getElementById('hint-box').classList.add('hidden');
+            document.getElementById('btn-hint').classList.remove('hidden');
+
+            // 1. Gambar Nyawa
+            gambarNyawa();
+
+            // 2. Set Informasi Atas Soal
+            document.getElementById('question-progress').innerText = `${state.indeksSoalAktif + 1} / 5`;
+            document.getElementById('question-topic').innerText = dataSoal.topik;
+            document.getElementById('question-text').innerText = dataSoal.pertanyaan;
+            document.getElementById('hint-text').innerText = dataSoal.rumusHint;
+
+            // Atur Tag Kategori Pulau
+            const tag = document.getElementById('question-tag');
+            if (state.pulauAktif === 1) { tag.innerText = "PULAU PERSEGI"; tag.className = "absolute top-0 right-0 bg-emerald-500 text-white px-4 py-1.5 rounded-bl-xl font-header text-xs tracking-wider"; }
+            else if (state.pulauAktif === 2) { tag.innerText = "PULAU PERSEGI PANJANG"; tag.className = "absolute top-0 right-0 bg-sky-500 text-white px-4 py-1.5 rounded-bl-xl font-header text-xs tracking-wider"; }
+            else if (state.pulauAktif === 3) { tag.innerText = "PULAU SEGITIGA"; tag.className = "absolute top-0 right-0 bg-amber-500 text-white px-4 py-1.5 rounded-bl-xl font-header text-xs tracking-wider"; }
+            else if (state.pulauAktif === 4) { tag.innerText = "HUTAN GABUNGAN"; tag.className = "absolute top-0 right-0 bg-teal-500 text-white px-4 py-1.5 rounded-bl-xl font-header text-xs tracking-wider"; }
+            else if (state.pulauAktif === 5) { tag.innerText = "KASTIL RAJA BANGUN"; tag.className = "absolute top-0 right-0 bg-violet-500 text-white px-4 py-1.5 rounded-bl-xl font-header text-xs tracking-wider"; }
+
+            // 3. Gambar Representasi Grafis Bangun Datar
+            gambarVisualBangun(dataSoal.visual);
+
+            // 4. Buat Opsi Jawaban Secara Acak
+            const containerOpsi = document.getElementById('answer-options-container');
+            containerOpsi.innerHTML = "";
+
+            dataSoal.opsi.forEach((opsi) => {
+                const btn = document.createElement('button');
+                btn.className = "bg-slate-50 hover:bg-sky-100 text-slate-800 text-left p-4 rounded-2xl border-2 border-slate-300 font-bold transition-all text-base md:text-lg flex justify-between items-center hover:border-sky-400 group";
+                btn.innerHTML = `
+                    <span>${opsi}</span>
+                    <span class="w-8 h-8 rounded-full bg-slate-200 group-hover:bg-sky-500 group-hover:text-white flex items-center justify-center transition-colors text-sm">✓</span>
+                `;
+                btn.onclick = () => verifikasiJawaban(opsi, dataSoal);
+                containerOpsi.appendChild(btn);
+            });
+        }
+
+        // MENGGAMBAR NYAWA/HATI SISA
+        function gambarNyawa() {
+            const container = document.getElementById('heart-container');
+            container.innerHTML = "";
+            for (let i = 1; i <= 3; i++) {
+                const heart = document.createElement('span');
+                heart.className = "text-2xl transition-transform duration-300";
+                if (i <= state.nyawa) {
+                    heart.innerHTML = "❤️"; // Hati terisi
+                } else {
+                    heart.innerHTML = "🖤"; // Hati hancur/kosong
+                    heart.classList.add("scale-90", "opacity-50");
+                }
+                container.appendChild(heart);
+            }
+        }
+
+        // MEMBUAT GAMBAR VISUAL BANGUN DATAR VIA INLINE SVG DINAMIS
+        function gambarVisualBangun(visualData) {
+            const container = document.getElementById('canvas-container');
+            container.innerHTML = "";
+
+            let svgHTML = "";
+
+            if (visualData.tipe === "persegi") {
+                const displayVal = visualData.s;
+                svgHTML = `
+                    <svg viewBox="0 0 200 200" class="w-40 h-40">
+                        <rect x="25" y="25" width="150" height="150" fill="#a7f3d0" stroke="#047857" stroke-width="4" rx="8" />
+                        <!-- Label Atas -->
+                        <text x="100" y="20" fill="#047857" font-weight="bold" font-size="16" text-anchor="middle">Sisi = ${displayVal} cm</text>
+                        <!-- Label Kiri -->
+                        <text x="15" y="105" fill="#047857" font-weight="bold" font-size="16" text-anchor="end">${displayVal} cm</text>
+                        <text x="100" y="105" fill="#065f46" font-weight="bold" font-size="28" text-anchor="middle">🟦</text>
+                    </svg>
+                `;
+            } 
+            else if (visualData.tipe === "persegi_panjang") {
+                const p = visualData.p;
+                const l = visualData.l;
+                svgHTML = `
+                    <svg viewBox="0 0 200 200" class="w-44 h-40">
+                        <rect x="15" y="40" width="170" height="100" fill="#bae6fd" stroke="#0369a1" stroke-width="4" rx="8" />
+                        <!-- Label Panjang -->
+                        <text x="100" y="30" fill="#0369a1" font-weight="bold" font-size="16" text-anchor="middle">p = ${p} cm</text>
+                        <!-- Label Lebar -->
+                        <text x="10" y="95" fill="#0369a1" font-weight="bold" font-size="14" text-anchor="end">l = ${l} cm</text>
+                        <text x="100" y="100" fill="#0369a1" font-weight="bold" font-size="24" text-anchor="middle">🟫</text>
+                    </svg>
+                `;
+            }
+            else if (visualData.tipe === "segitiga_sisi") {
+                const s = visualData.s;
+                svgHTML = `
+                    <svg viewBox="0 0 200 200" class="w-40 h-40">
+                        <polygon points="100,25 25,160 175,160" fill="#fde68a" stroke="#b45309" stroke-width="4" stroke-linejoin="round" />
+                        <!-- Label Sisi Kiri -->
+                        <text x="45" y="100" fill="#b45309" font-weight="bold" font-size="15" text-anchor="end">${s} cm</text>
+                        <!-- Label Sisi Kanan -->
+                        <text x="155" y="100" fill="#b45309" font-weight="bold" font-size="15" text-anchor="start">${s} cm</text>
+                        <!-- Label Alas -->
+                        <text x="100" y="180" fill="#b45309" font-weight="bold" font-size="15" text-anchor="middle">alas = ${s} cm</text>
+                    </svg>
+                `;
+            }
+            else if (visualData.tipe === "segitiga_siku") {
+                const a = visualData.a;
+                const t = visualData.t;
+                const m = visualData.m || "?";
+                svgHTML = `
+                    <svg viewBox="0 0 200 200" class="w-40 h-40">
+                        <polygon points="40,30 40,160 170,160" fill="#fde68a" stroke="#b45309" stroke-width="4" stroke-linejoin="round" />
+                        <!-- Tanda siku-siku -->
+                        <rect x="40" y="150" width="10" height="10" fill="none" stroke="#b45309" stroke-width="2" />
+                        <!-- Label Tinggi -->
+                        <text x="30" y="95" fill="#b45309" font-weight="bold" font-size="15" text-anchor="end">t = ${t} cm</text>
+                        <!-- Label Alas -->
+                        <text x="105" y="180" fill="#b45309" font-weight="bold" font-size="15" text-anchor="middle">a = ${a} cm</text>
+                        <!-- Sisi Miring jika ada -->
+                        ${m !== "?" ? `<text x="120" y="95" fill="#78350f" font-weight="bold" font-size="14" text-anchor="start">${m} cm</text>` : ''}
+                    </svg>
+                `;
+            }
+            else if (visualData.tipe === "segitiga_kaki") {
+                const a = visualData.a;
+                const k = visualData.k;
+                svgHTML = `
+                    <svg viewBox="0 0 200 200" class="w-40 h-40">
+                        <polygon points="100,25 40,160 160,160" fill="#fed7aa" stroke="#c2410c" stroke-width="4" stroke-linejoin="round" />
+                        <!-- Label Kaki Kiri -->
+                        <text x="50" y="95" fill="#c2410c" font-weight="bold" font-size="14" text-anchor="end">${k} cm</text>
+                        <!-- Label Kaki Kanan -->
+                        <text x="150" y="95" fill="#c2410c" font-weight="bold" font-size="14" text-anchor="start">${k} cm</text>
+                        <!-- Label Alas -->
+                        <text x="100" y="180" fill="#c2410c" font-weight="bold" font-size="15" text-anchor="middle">alas = ${a} cm</text>
+                    </svg>
+                `;
+            }
+            else if (visualData.tipe === "dua_bangun") {
+                svgHTML = `
+                    <svg viewBox="0 0 240 200" class="w-full h-40">
+                        <!-- Bangun A -->
+                        <rect x="15" y="50" width="80" height="60" fill="#a7f3d0" stroke="#047857" stroke-width="3" />
+                        <text x="55" y="40" fill="#047857" font-weight="bold" font-size="12" text-anchor="middle">Papan A: 3m x 2m</text>
+                        <!-- Bangun B -->
+                        <rect x="130" y="50" width="95" height="40" fill="#bae6fd" stroke="#0369a1" stroke-width="3" />
+                        <text x="177" y="40" fill="#0369a1" font-weight="bold" font-size="12" text-anchor="middle">Papan B: 4m x 1.5m</text>
+                    </svg>
+                `;
+            }
+            else if (visualData.tipe === "gabungan_persegi") {
+                svgHTML = `
+                    <svg viewBox="0 0 200 200" class="w-40 h-40">
+                        <rect x="25" y="60" width="70" height="70" fill="#a7f3d0" stroke="#047857" stroke-width="3" />
+                        <rect x="95" y="60" width="70" height="70" fill="#a7f3d0" stroke="#047857" stroke-width="3" />
+                        <text x="100" y="50" fill="#047857" font-weight="bold" font-size="14" text-anchor="middle">2 Persegi Menempel</text>
+                        <text x="100" y="150" fill="#047857" font-weight="bold" font-size="13" text-anchor="middle">Setiap Sisi = 5 cm</text>
+                    </svg>
+                `;
+            }
+            else if (visualData.tipe === "gabungan_l") {
+                svgHTML = `
+                    <svg viewBox="0 0 200 200" class="w-40 h-40">
+                        <path d="M 40,40 L 140,40 L 140,100 L 90,100 L 90,160 L 40,160 Z" fill="#fed7aa" stroke="#ea580c" stroke-width="4" stroke-linejoin="round" />
+                        <text x="90" y="110" fill="#ea580c" font-weight="bold" font-size="18" text-anchor="middle">🏡</text>
+                    </svg>
+                `;
+            }
+            else if (visualData.tipe === "diarsir") {
+                svgHTML = `
+                    <svg viewBox="0 0 200 200" class="w-40 h-40">
+                        <!-- Luar -->
+                        <rect x="20" y="30" width="160" height="120" fill="#cbd5e1" stroke="#475569" stroke-width="3" />
+                        <!-- Dalam (Lubang) -->
+                        <rect x="80" y="70" width="40" height="40" fill="#f8fafc" stroke="#475569" stroke-dasharray="4" stroke-width="2" />
+                        <text x="100" y="165" fill="#475569" font-weight="bold" font-size="12" text-anchor="middle">Karton Dilubangi</text>
+                    </svg>
+                `;
+            }
+            else if (visualData.tipe === "halaman") {
+                svgHTML = `
+                    <svg viewBox="0 0 200 200" class="w-40 h-40">
+                        <!-- Halaman -->
+                        <rect x="15" y="30" width="170" height="120" fill="#fed7aa" stroke="#c2410c" stroke-width="3" />
+                        <!-- Taman Bunga -->
+                        <rect x="55" y="60" width="90" height="60" fill="#fbcfe8" stroke="#db2777" stroke-width="2" />
+                        <text x="100" y="95" fill="#db2777" font-weight="bold" font-size="12" text-anchor="middle">🌸 Taman</text>
+                    </svg>
+                `;
+            }
+            else if (visualData.tipe === "rumah") {
+                svgHTML = `
+                    <svg viewBox="0 0 200 200" class="w-40 h-40">
+                        <!-- Tembok -->
+                        <rect x="40" y="90" width="120" height="80" fill="#a5f3fc" stroke="#0891b2" stroke-width="3" />
+                        <!-- Atap -->
+                        <polygon points="40,90 100,30 160,90" fill="#fecdd3" stroke="#e11d48" stroke-width="3" />
+                        <text x="100" y="110" fill="#0f172a" font-size="20" text-anchor="middle">🏫</text>
+                    </svg>
+                `;
+            }
+            else {
+                // Default Visual jika tipe kompleks / berupa ikon pendukung saja
+                svgHTML = `
+                    <svg viewBox="0 0 200 200" class="w-40 h-40">
+                        <circle cx="100" cy="100" r="70" fill="#fef08a" stroke="#ca8a04" stroke-width="4" stroke-dasharray="4" />
+                        <text x="100" y="110" font-size="44" text-anchor="middle">⭐</text>
+                    </svg>
+                `;
+            }
+
+            container.innerHTML = svgHTML;
+        }
+
+        // TAMPILKAN BANTUAN RUMUS SAAT BERMAIN
+        function tampilkanBantuanRumus() {
+            document.getElementById('hint-box').classList.remove('hidden');
+            document.getElementById('btn-hint').classList.add('hidden');
+            speakText("Ini rumus rahasianya!");
+        }
+
+        // VERIFIKASI JAWABAN PEMAIN
+        function verifikasiJawaban(jawabanDipilih, dataSoal) {
+            const modal = document.getElementById('modal-feedback');
+            const icon = document.getElementById('feedback-icon');
+            const title = document.getElementById('feedback-title');
+            const text = document.getElementById('feedback-text');
+            const nextBtn = document.getElementById('feedback-next-btn');
+
+            let benar = (jawabanDipilih === dataSoal.jawaban);
+
+            if (benar) {
+                state.soalBenarPulau++;
+                state.skorGlobal += 20; // Setiap jawaban benar bernilai 20 poin
+                
+                icon.innerText = "🎉";
+                icon.className = "text-6xl mb-4 animate-bounce text-emerald-500";
+                title.innerText = "KEREN! BENAR!";
+                title.className = "font-header text-2xl mb-2 text-emerald-600";
+                text.innerHTML = `Kamu memilih <strong>${jawabanDipilih}</strong>.<br><br>📝 <strong>Pembahasan:</strong> ${dataSoal.pembahasan}`;
+                
+                nextBtn.className = "w-full bg-emerald-500 hover:bg-emerald-600 text-white font-header py-3 rounded-xl border-b-4 border-emerald-700";
+                speakText("Luar biasa! Jawabanmu benar!");
+            } else {
+                state.soalSalahPulau++;
+                state.nyawa--;
+
+                icon.innerText = "💥";
+                icon.className = "text-6xl mb-4 animate-shake text-rose-500";
+                title.innerText = "UPS! JAWABAN KURANG TEPAT";
+                title.className = "font-header text-2xl mb-2 text-rose-600";
+                text.innerHTML = `Jawabanmu salah sedikit! Jawaban yang benar adalah <strong>${dataSoal.jawaban}</strong>.<br><br>📝 <strong>Pembahasan:</strong> ${dataSoal.pembahasan}`;
+                
+                nextBtn.className = "w-full bg-rose-500 hover:bg-rose-600 text-white font-header py-3 rounded-xl border-b-4 border-rose-700";
+                speakText("Aduh, kurang tepat! Jangan menyerah ya!");
+            }
+
+            // Update skor global di pojok layar
+            document.getElementById('global-score').innerText = state.skorGlobal;
+
+            // Tampilkan modal feedback jawaban
+            modal.classList.remove('hidden');
+
+            // Atur fungsi transisi ke pertanyaan berikutnya saat tombol di modal ditekan
+            nextBtn.onclick = function() {
+                modal.classList.add('hidden');
+                
+                // Cek apakah nyawa habis
+                if (state.nyawa <= 0) {
+                    selesaiPulau(false); // Gagal karena nyawa habis
+                } else {
+                    // Berpindah ke soal berikutnya
+                    state.indeksSoalAktif++;
+                    
+                    const totalSoalPulau = bankSoal[state.pulauAktif].length;
+                    if (state.indeksSoalAktif < totalSoalPulau) {
+                        muatSoalAktif();
+                    } else {
+                        selesaiPulau(true); // Sukses menyelesaikan pulau
+                    }
+                }
+            };
+        }
+
+        // PENYELESAIAN MISI DI PULAU (SELESAI 5 SOAL ATAU MATI)
+        function selesaiPulau(apakahSukses) {
+            pindahTampilan('screen-game-over');
+
+            const emoji = document.getElementById('go-emoji');
+            const title = document.getElementById('go-title');
+            const message = document.getElementById('go-message');
+            const scoreDisplay = document.getElementById('go-score');
+            const accuracyDisplay = document.getElementById('go-accuracy');
+
+            const poinPulauIni = state.soalBenarPulau * 20;
+
+            if (apakahSukses) {
+                state.pulauSelesai[state.pulauAktif] = true; // Tandai pulau ini selesai di peta
+                simpanKeLeaderboard(); // Simpan skor ke penyimpanan
+
+                emoji.innerText = "🏆";
+                title.innerText = "MISI PULAU SELESAI!";
+                title.className = "text-3xl font-header text-emerald-600 mb-2";
+                message.innerText = `Luar biasa, ${state.namaPemain}! Kamu telah sukses mengamankan Pulau ${dapatkanNamaPulau(state.pulauAktif)}!`;
+                speakText("Selamat! Kamu berhasil menaklukkan Pulau ini!");
+            } else {
+                emoji.innerText = "💀";
+                title.innerText = "MISI GAGAL / NYAWA HABIS";
+                title.className = "text-3xl font-header text-rose-600 mb-2";
+                message.innerText = `Oh tidak, ${state.namaPemain}! Kekuatan matematika kamu melemah. Coba ulangi pulau ini dan pulihkan keadaan!`;
+                speakText("Sayang sekali nyawamu habis. Mari coba lagi!");
+            }
+
+            scoreDisplay.innerText = `+${poinPulauIni} Poin`;
+            accuracyDisplay.innerText = `Benar: ${state.soalBenarPulau} | Salah: ${state.soalSalahPulau}`;
+        }
+
+        // RETRY / MAIN ULANG PULAU INI
+        function mainLagiPulauIni() {
+            pilihPulau(state.pulauAktif);
+        }
+
+        // FUNGSI UTILITY: NAMA-NAMA PULAU
+        function dapatkanNamaPulau(id) {
+            const nama = {
+                1: "Persegi",
+                2: "Persegi Panjang",
+                3: "Segitiga",
+                4: "Hutan Luas Gabungan",
+                5: "Kastil Raja Bangun"
+            };
+            return nama[id] || "";
+        }
+
+        // SYSTEM AUDIO SINTESIS (TTS) SEDERHANA AGAR LEBIH INTERAKTIF
+        function speakText(text) {
+            if ('speechSynthesis' in window) {
+                const speech = new SpeechSynthesisUtterance(text);
+                speech.lang = 'id-ID';
+                speech.rate = 1.1; // Sedikit lebih cepat agar ramah anak
+                speech.pitch = 1.2; // Pitch ceria
+                window.speechSynthesis.speak(speech);
+            }
+        }
+
+        // PERSISTENCE: PAPAN SKOR LOKAL (LOCALSTORAGE)
+        function simpanKeLeaderboard() {
+            let dataLokal = localStorage.getItem('penjelajah_leaderboard');
+            let arraySkor = dataLokal ? JSON.parse(dataLokal) : [];
+
+            // Cari apakah nama ini sudah pernah ada
+            const indexPemain = arraySkor.findIndex(p => p.nama.toLowerCase() === state.namaPemain.toLowerCase());
+            
+            if (indexPemain !== -1) {
+                // Update skor jika skor baru lebih tinggi
+                if (state.skorGlobal > arraySkor[indexPemain].skor) {
+                    arraySkor[indexPemain].skor = state.skorGlobal;
+                }
+            } else {
+                arraySkor.push({ nama: state.namaPemain, skor: state.skorGlobal });
+            }
+
+            // Urutkan berdasarkan skor tertinggi ke terendah
+            arraySkor.sort((a, b) => b.skor - a.skor);
+
+            // Batasi hanya menyimpan 5 pemain teratas
+            arraySkor = arraySkor.slice(0, 5);
+
+            localStorage.setItem('penjelajah_leaderboard', JSON.stringify(arraySkor));
+            muatLeaderboard();
+        }
+
+        function muatLeaderboard() {
+            const container = document.getElementById('mini-leaderboard');
+            let dataLokal = localStorage.getItem('penjelajah_leaderboard');
+            let arraySkor = dataLokal ? JSON.parse(dataLokal) : [];
+
+            if (arraySkor.length === 0) {
+                container.innerHTML = `<p class="text-xs text-slate-400 text-center italic py-2">Belum ada penjelajah yang terdaftar. Jadilah yang pertama!</p>`;
+                return;
+            }
+
+            container.innerHTML = "";
+            arraySkor.forEach((item, index) => {
+                let medali = ["🥇", "🥈", "🥉", "🏅", "🎗️"][index] || "⭐️";
+                const bar = document.createElement('div');
+                bar.className = "flex justify-between items-center bg-sky-50 px-3 py-1.5 rounded-xl border border-sky-100";
+                bar.innerHTML = `
+                    <span class="font-bold text-slate-700">${medali} ${item.nama}</span>
+                    <span class="font-header text-sky-600">${item.skor} Poin</span>
+                `;
+                container.appendChild(bar);
+            });
+        }
+    </script>
+</body>
+</html>
